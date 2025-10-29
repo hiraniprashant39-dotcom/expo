@@ -1,3 +1,171 @@
+    import React, { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Sun, Droplet, Sprout, DollarSign, Bell, Camera, MapPin, Plus } from 'lucide-react';
+
+// This is a single-file React demo for the "મારી વાડી" app UI.
+// Built-as: a simple React web component (uses Tailwind + shadcn-like components).
+
+export default function MariVadiApp() {
+  // Simple in-memory state for the demo
+  const [crops, setCrops] = useState([
+    { id: 1, name: "કેરી", water: "3 લિટર/દિવસ", pesticide: "Neem Oil", notes: "ફૂલ આવી રહ્યા છે" },
+    { id: 2, name: "ચીકુ", water: "2 લિટર/દિવસ", pesticide: "None", notes: "મૃદા સૂકી" }
+  ]);
+  const [showAddCrop, setShowAddCrop] = useState(false);
+  const [newCrop, setNewCrop] = useState({ name: "", water: "", pesticide: "", notes: "" });
+
+  const [photos, setPhotos] = useState([]);
+  const [reminders, setReminders] = useState([
+    { id: 1, text: "આજે ચીકુ પર દવા છાંટવી" },
+    { id: 2, text: "દ્રાક્ષને પાણી આપવું" }
+  ]);
+  const [newReminder, setNewReminder] = useState("");
+
+  // Handlers
+  function addCrop(e) {
+    e.preventDefault();
+    if (!newCrop.name) return;
+    const id = Date.now();
+    setCrops([...crops, { id, ...newCrop }]);
+    setNewCrop({ name: "", water: "", pesticide: "", notes: "" });
+    setShowAddCrop(false);
+  }
+
+  function handlePhotoUpload(e) {
+    const files = Array.from(e.target.files);
+    const added = files.map((f, i) => ({ id: Date.now() + i, name: f.name, url: URL.createObjectURL(f) }));
+    setPhotos([...photos, ...added]);
+  }
+
+  function addReminder(e) {
+    e.preventDefault();
+    if (!newReminder.trim()) return;
+    setReminders([...reminders, { id: Date.now(), text: newReminder.trim() }]);
+    setNewReminder("");
+  }
+
+  return (
+    <div className="min-h-screen bg-green-50 p-6">
+      <h1 className="text-3xl font-bold text-green-700 mb-6 text-center">🌿 મારી વાડી — ડેશબોર્ડ</h1>
+
+      {/* Weather + Summary */}
+      <div className="grid md:grid-cols-3 gap-4 mb-6">
+        <Card>
+          <CardContent className="flex items-center justify-between p-4">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-700">આજનું હવામાન</h2>
+              <p className="text-gray-600">તાપમાન: 32°C | વરસાદની શક્યતા: 40%</p>
+            </div>
+            <Sun className="text-yellow-500 w-10 h-10" />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4 text-gray-700">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2"><DollarSign className="w-5 h-5"/> <div>
+                <div className="text-sm">કુલ ખર્ચ</div>
+                <div className="font-semibold">₹ 12,500</div>
+              </div></div>
+
+              <div className="flex items-center gap-2"><Sprout className="w-5 h-5"/> <div>
+                <div className="text-sm">આવક</div>
+                <div className="font-semibold text-green-700">₹ 28,000</div>
+              </div></div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4 text-gray-700">
+            <div className="flex items-center gap-3">
+              <Bell className="w-5 h-5"/>
+              <div>
+                <div className="text-sm">આજની સૂચનાઓ</div>
+                <div className="font-medium">{reminders.length} સૂચન થયા છે</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Crop Management */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-2xl font-semibold text-green-700">🌾 પાક મેનેજમેન્ટ</h2>
+          <Button onClick={() => setShowAddCrop(!showAddCrop)} className="flex items-center gap-2"><Plus className="w-4 h-4"/> નવું પાક ઉમેરો</Button>
+        </div>
+
+        {showAddCrop && (
+          <Card className="mb-4">
+            <CardContent>
+              <form onSubmit={addCrop} className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <Label>પાકનું નામ</Label>
+                  <Input value={newCrop.name} onChange={e => setNewCrop({...newCrop, name: e.target.value})} placeholder="જેમ - કેરી" />
+                </div>
+                <div>
+                  <Label>પાણી</Label>
+                  <Input value={newCrop.water} onChange={e => setNewCrop({...newCrop, water: e.target.value})} placeholder="જેમ - 3 લિટર/દિવસ" />
+                </div>
+                <div>
+                  <Label>દવા / ખાતર</Label>
+                  <Input value={newCrop.pesticide} onChange={e => setNewCrop({...newCrop, pesticide: e.target.value})} placeholder="જેમ - Neem Oil" />
+                </div>
+                <div>
+                  <Label>નોંધ</Label>
+                  <Textarea value={newCrop.notes} onChange={e => setNewCrop({...newCrop, notes: e.target.value})} placeholder="ઓછા શબ્દોમાં નોંધો" />
+                </div>
+                <div className="md:col-span-2 flex justify-end gap-2">
+                  <Button type="button" onClick={() => setShowAddCrop(false)}>રદ કરો</Button>
+                  <Button type="submit" className="bg-green-600 text-white">ઉમેરો</Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        )}
+
+        <div className="grid md:grid-cols-3 gap-4">
+          {crops.map(crop => (
+            <Card key={crop.id} className="shadow-sm">
+              <CardContent>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-700">{crop.name}</h3>
+                    <p className="text-sm text-gray-500">પાણી: {crop.water}</p>
+                    <p className="text-sm text-gray-500">દવા: {crop.pesticide}</p>
+                    <p className="text-sm mt-2">{crop.notes}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-2">
+                    <Button className="text-sm">વિગત જુઓ</Button>
+                    <Button className="text-sm">સંપાદિત કરો</Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* Map Section */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-2xl font-semibold text-green-700">🗺️ વાડીનો નકશો</h2>
+          <div className="text-sm text-gray-500 flex items-center gap-2"><MapPin className="w-4 h-4"/> સ્થાન જોડવા માટે પરવાનગી આપો</div>
+        </div>
+
+        <Card>
+          <CardContent className="p-0">
+            {/* Placeholder map — replace with Google Maps component and API key in production */}
+            <div className="w-full h-56 md:h-72 bg-gray-100 flex items-center justify-center">
+              <div className="text-center text-gray-500">
+                <div className="mb-2">[Map Placeholder]</div>
+                <div className="text-sm">Google Maps API
+    
 ---
 title: Expo CLI
 maxHeadingDepth: 4
